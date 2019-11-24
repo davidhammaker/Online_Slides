@@ -9,7 +9,7 @@ class Slideshow(models.Model):
 
 
 class Slide(models.Model):
-    image = models.ImageField()
+    image = models.ImageField(upload_to="temp_images/")
     slideshow = models.ForeignKey(
         Slideshow,
         on_delete=models.CASCADE,
