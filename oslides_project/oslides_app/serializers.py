@@ -38,6 +38,10 @@ class SlideSerializer(serializers.ModelSerializer):
         return slide.image.name.split('/')[-1]
 
     def get_image_url(self, slide):
+        """
+        Retrieve the temporary URL for the image from Dropbox. This URL
+        lasts for 4 hours, and will be used during presentations.
+        """
         url = "https://api.dropboxapi.com/2/files/get_temporary_link"
         key = os.environ.get('OSLIDES_DROPBOX_KEY')
         headers = {
@@ -49,6 +53,8 @@ class SlideSerializer(serializers.ModelSerializer):
         return response.json()['link']
 
     def validate(self, data):
+
+        # Get slideshow ID or return an error
         slideshow_id = self.context['request'] \
             .parser_context['kwargs']['slideshow_id']
 
@@ -59,23 +65,31 @@ class SlideSerializer(serializers.ModelSerializer):
                 'Slideshow does not exist.'
             )
 
+        # Retrieve the image from posted data
         image = data['image']
-        pprint(image.__dict__)
-        print(str(type(image.file)))
+
+        # The image file stored in memory will either be a BytesIO
+        # object or a tempfile object. Each must be treated differently.
         if "tempfile" in str(type(image.file)):
             image_data = open(image.file.name, 'rb').read()
         else:
             image_data = image.file.getvalue()
+
+        # Each filetype must be maintained. I don't expect 'bmp' to ever
+        # be used, but it has been included just in case.
         extension = 'bmp'
         if image.content_type == 'image/png':
             extension = 'png'
         elif image.content_type == 'image/jpeg':
             extension = 'jpg'
+
+        # The filename is a random number 10-digit number, plus its
+        # original file extension.
         filename = \
             f'img{int(899999999*random()) + 100000000}.{extension}'
         data['image'] = filename
-        print('DATA\nDATA\nDATA')
-        pprint(data)
+
+        # The file is uploaded to Dropbox
         url = "https://content.dropboxapi.com/2/files/upload"
         key = os.environ.get('OSLIDES_DROPBOX_KEY')
         dropbox_api_arg = "{\"path\":\"/" + f'{filename}' + "\"}"
@@ -83,6 +97,6 @@ class SlideSerializer(serializers.ModelSerializer):
             "Authorization": f"Bearer {key}",
             "Content-Type": "application/octet-stream",
             "Dropbox-API-Arg": dropbox_api_arg}
-        response = requests.post(url, headers=headers, data=image_data)
-        print(response.json())
+        requests.post(url, headers=headers, data=image_data)
+
         return data

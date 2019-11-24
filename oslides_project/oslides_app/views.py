@@ -15,7 +15,6 @@ def root(request, format=None):
     })
 
 
-
 class SlideshowList(generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     serializer_class = SlideshowSerializer
