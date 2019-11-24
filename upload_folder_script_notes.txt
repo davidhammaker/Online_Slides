@@ -1,0 +1,20 @@
+[started Python within a directory containing "example_slideshow" directory]
+
+
+>>> import os
+
+>>> file_list = []
+>>> for files in os.listdir("example_slideshow"):
+...     file_list.append(files)
+
+>>> file_list.sort()
+>>> file_list
+['img0.png', 'img1.png', 'img2.png', 'img3.png', 'img4.png']
+
+>>> import requests
+
+>>> for file in file_list:
+...     url = "http://localhost:8000/slideshows/9/"
+...     files= {'image': open(f'example_slideshow/{file}','rb')}
+...     data = {'slideshow': 9}
+...     requests.post(url, files=files, data=data)
