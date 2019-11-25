@@ -16,13 +16,13 @@ def root(request, format=None):
 
 
 class SlideshowList(generics.ListCreateAPIView):
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    # permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     serializer_class = SlideshowSerializer
     queryset = Slideshow.objects.all()
 
 
 class SlideList(generics.ListCreateAPIView):
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    # permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     serializer_class = SlideSerializer
 
     def get_queryset(self):
